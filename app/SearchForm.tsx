@@ -1,7 +1,7 @@
-"use client"; // 告诉系统这是一个在浏览器端运行的交互组件
+"use client"; 
 
-import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useRouter, usePathname, useSearchParams } from 'next/navigation';
+import { useState, useEffect } from 'react';
 
 export default function SearchForm({ 
   allCats, 
@@ -11,17 +11,36 @@ export default function SearchForm({
   initialCat: string 
 }) {
   const router = useRouter();
+  const pathname = usePathname(); 
+  const searchParams = useSearchParams();
+
   const [cat, setCat] = useState(initialCat);
 
+  // 监听浏览器前进后退，自动同步输入框的文字
+  useEffect(() => {
+    setCat(initialCat);
+  }, [initialCat]);
+
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault(); // 核心：拦截并阻止浏览器默认的“整体刷新”行为
-    // 核心：使用 Next.js 路由进行静默更新，scroll: false 保证页面不会自动跳回最顶部
-    router.push(`?cat=${encodeURIComponent(cat)}`, { scroll: false });
+    e.preventDefault(); 
+    
+    const params = new URLSearchParams(searchParams.toString());
+    if (cat.trim() !== '') {
+      params.set('cat', cat.trim());
+    } else {
+      params.delete('cat');
+    }
+    
+    // 1. 无感更新网址
+    router.push(`${pathname}?${params.toString()}`, { scroll: false });
+    // 2. 【核心修复】：强行踹一脚服务器，命令它立刻去数据库拿最新数据！
+    router.refresh(); 
   };
 
   const handleReset = () => {
     setCat('');
-    router.push('?', { scroll: false });
+    router.push(`${pathname}`, { scroll: false });
+    router.refresh(); // 同样强制刷新
   };
 
   return (

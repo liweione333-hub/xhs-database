@@ -1,26 +1,32 @@
 import { sql } from '@vercel/postgres';
-import SearchForm from './SearchForm'; // 引入刚才新建的无刷新组件
+import SearchForm from './SearchForm';
 
+// 【核心修复】：彻底关闭服务器端的任何缓存念头
 export const dynamic = 'force-dynamic';
+export const fetchCache = 'force-no-store';
 export const revalidate = 0;
 
 export const metadata = {
   title: '小红书笔记采集',
 };
 
-export default async function XhsDashboard(props: {
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+export default async function XhsDashboard({
+  searchParams,
+}: {
+  // 兼容 Next.js 14(对象) 和 Next.js 15(Promise) 两种形态
+  searchParams: { [key: string]: string | undefined } | Promise<{ [key: string]: string | undefined }>;
 }) {
-  const searchParams = await props.searchParams;
-  const selectedCat = typeof searchParams.cat === 'string' ? searchParams.cat.trim() : '';
+  // 安全解析参数
+  const resolvedParams = await searchParams;
+  const selectedCat = resolvedParams?.cat ? String(resolvedParams.cat).trim() : '';
 
   // 获取所有唯一的分类
   const { rows: allCatsResult } = await sql`SELECT DISTINCT category FROM xhs_notes ORDER BY category ASC`;
-  // 将对象数组转换为纯字符串数组，传给子组件
   const allCats = allCatsResult.map(row => row.category);
 
+  // 根据参数生成数据库请求
   let query;
-  if (selectedCat) {
+  if (selectedCat !== '') {
     const filter = `%${selectedCat}%`;
     query = sql`SELECT * FROM xhs_notes WHERE category LIKE ${filter} ORDER BY created_at DESC`;
   } else {
@@ -38,16 +44,17 @@ export default async function XhsDashboard(props: {
     <main style={{ padding: '40px', fontFamily: 'system-ui', backgroundColor: '#f9fafb', minHeight: '100vh' }}>
       <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
         
-        {/* 顶部标题栏 */}
         <header style={{ marginBottom: '30px' }}>
           <h1 style={{ color: '#ff2442', fontSize: '28px', margin: 0 }}>📊 小红书爆款笔记采集</h1>
           <p style={{ color: '#666', marginTop: '5px' }}>系统化管理你的笔记情报库</p>
         </header>
 
-        {/* 统计卡片 */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px', marginBottom: '30px' }}>
           <div style={{ background: '#fff', padding: '20px', borderRadius: '12px', boxShadow: '0 2px 10px rgba(0,0,0,0.05)' }}>
-            <p style={{ color: '#888', fontSize: '14px', margin: 0 }}>当前筛选结果</p>
+            {/* 这里的文案修改了，如果筛选了类目，会直接在卡片上显示出来 */}
+            <p style={{ color: '#888', fontSize: '14px', margin: 0 }}>
+              当前筛选结果 {selectedCat ? <span style={{color: '#ff2442', fontWeight: 'bold'}}>[ {selectedCat} ]</span> : '[ 全部 ]'}
+            </p>
             <h2 style={{ fontSize: '32px', margin: '10px 0 0 0', color: '#333' }}>{totalNotes} <small style={{ fontSize: '14px', color: '#ff2442' }}>篇</small></h2>
           </div>
           <div style={{ background: '#fff', padding: '20px', borderRadius: '12px', boxShadow: '0 2px 10px rgba(0,0,0,0.05)' }}>
@@ -60,12 +67,10 @@ export default async function XhsDashboard(props: {
           </div>
         </div>
 
-        {/* 筛选功能区：现在使用独立的客户端无刷新组件 */}
         <div style={{ background: '#fff', padding: '25px', borderRadius: '12px', boxShadow: '0 2px 10px rgba(0,0,0,0.05)', marginBottom: '30px' }}>
           <SearchForm allCats={allCats} initialCat={selectedCat} />
         </div>
 
-        {/* 数据表格区 */}
         <div style={{ background: '#fff', borderRadius: '16px', boxShadow: '0 4px 20px rgba(0,0,0,0.08)', overflow: 'hidden' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
             <thead>
@@ -79,7 +84,7 @@ export default async function XhsDashboard(props: {
               </tr>
             </thead>
             <tbody>
-              {rows.map((note: any, index: number) => (
+              {rows.length > 0 ? rows.map((note: any, index: number) => (
                 <tr key={note.id} style={{ borderBottom: '1px solid #f5f5f5' }}>
                   <td style={{ padding: '15px 20px', textAlign: 'center', color: '#999', fontSize: '14px' }}>
                     {index + 1}
@@ -98,7 +103,13 @@ export default async function XhsDashboard(props: {
                     </a>
                   </td>
                 </tr>
-              ))}
+              )) : (
+                <tr>
+                  <td colSpan={6} style={{ padding: '40px', textAlign: 'center', color: '#999' }}>
+                    没有找到符合该分类的数据
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
