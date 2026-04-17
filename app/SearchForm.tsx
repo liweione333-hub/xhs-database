@@ -3,73 +3,93 @@
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { useState, useEffect } from 'react';
 
-export default function SearchForm({ 
-  allCats, 
-  initialCat 
-}: { 
-  allCats: string[], 
-  initialCat: string 
-}) {
+export default function SearchForm({ allCats, initialCat }: { allCats: string[], initialCat: string }) {
   const router = useRouter();
   const pathname = usePathname(); 
   const searchParams = useSearchParams();
-
   const [cat, setCat] = useState(initialCat);
 
-  // 监听浏览器前进后退，自动同步输入框的文字
-  useEffect(() => {
-    setCat(initialCat);
-  }, [initialCat]);
+  useEffect(() => { setCat(initialCat); }, [initialCat]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault(); 
-    
     const params = new URLSearchParams(searchParams.toString());
-    if (cat.trim() !== '') {
+    if (cat.trim()) {
       params.set('cat', cat.trim());
     } else {
       params.delete('cat');
     }
-    
-    // 1. 无感更新网址
     router.push(`${pathname}?${params.toString()}`, { scroll: false });
-    // 2. 【核心修复】：强行踹一脚服务器，命令它立刻去数据库拿最新数据！
     router.refresh(); 
   };
 
-  const handleReset = () => {
-    setCat('');
-    router.push(`${pathname}`, { scroll: false });
-    router.refresh(); // 同样强制刷新
-  };
-
   return (
-    <form onSubmit={handleSubmit} style={{ display: 'flex', gap: '15px', alignItems: 'flex-end' }}>
-      <div style={{ flex: 1 }}>
-        <label style={{ fontSize: '14px', color: '#333', fontWeight: '600', display: 'block', marginBottom: '8px' }}>
-          按分类查询（可输入关键词或直接选择）：
-        </label>
-        <input 
-          value={cat}
-          onChange={(e) => setCat(e.target.value)}
-          list="category-list"
-          placeholder="例如输入：竞品、穿搭、痛点..." 
-          style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #ddd', fontSize: '14px' }} 
-        />
-        <datalist id="category-list">
-          {allCats.map(c => (
-            <option key={c} value={c} />
-          ))}
-        </datalist>
-      </div>
+    <form onSubmit={handleSubmit} style={{ 
+      display: 'flex', 
+      alignItems: 'center', 
+      gap: '5px',
+      background: '#fff',
+      padding: '4px 4px 4px 12px',
+      borderRadius: '25px',
+      border: '1px solid #ddd',
+      boxShadow: '0 2px 6px rgba(0,0,0,0.05)',
+      width: 'fit-content'
+    }}>
+      <span style={{ fontSize: '12px', color: '#999', whiteSpace: 'nowrap' }}>📁 分类:</span>
+      <input 
+        value={cat}
+        onChange={(e) => setCat(e.target.value)}
+        list="category-list"
+        placeholder="输入关键词..." 
+        style={{ 
+          border: 'none', 
+          outline: 'none', 
+          fontSize: '13px', 
+          width: '150px',
+          color: '#333',
+          padding: '4px 0'
+        }} 
+      />
+      <datalist id="category-list">
+        {allCats.map(c => (
+          <option key={c} value={c} />
+        ))}
+      </datalist>
       
-      <button type="submit" style={{ padding: '12px 30px', background: '#ff2442', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', fontSize: '14px' }}>
-        🔍 立即筛选
+      <button type="submit" style={{ 
+        padding: '6px 14px', 
+        background: '#ff2442', 
+        color: '#fff', 
+        border: 'none', 
+        borderRadius: '20px', 
+        cursor: 'pointer', 
+        fontWeight: '600', 
+        fontSize: '12px',
+        transition: 'opacity 0.2s'
+      }}
+      onMouseOver={(e) => e.currentTarget.style.opacity = '0.8'}
+      onMouseOut={(e) => e.currentTarget.style.opacity = '1'}
+      >
+        筛选
       </button>
-      
-      <button type="button" onClick={handleReset} style={{ paddingBottom: '12px', background: 'none', border: 'none', color: '#666', textDecoration: 'none', fontSize: '13px', cursor: 'pointer' }}>
-        重置
-      </button>
+
+      {cat && (
+        <button 
+          type="button" 
+          onClick={() => { setCat(''); router.push(pathname); router.refresh(); }} 
+          style={{
+            background: 'none', 
+            border: 'none', 
+            color: '#999', 
+            fontSize: '11px', 
+            cursor: 'pointer', 
+            padding: '0 8px',
+            textDecoration: 'underline'
+          }}
+        >
+          重置
+        </button>
+      )}
     </form>
   );
 }
