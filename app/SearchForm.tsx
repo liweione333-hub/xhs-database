@@ -16,7 +16,6 @@ export default function SearchForm({
 
   const [cat, setCat] = useState(initialCat);
 
-  // 监听浏览器前进后退，自动同步输入框的文字
   useEffect(() => {
     setCat(initialCat);
   }, [initialCat]);
@@ -31,43 +30,39 @@ export default function SearchForm({
       params.delete('cat');
     }
     
-    // 1. 无感更新网址
     router.push(`${pathname}?${params.toString()}`, { scroll: false });
-    // 2. 【核心修复】：强行踹一脚服务器，命令它立刻去数据库拿最新数据！
     router.refresh(); 
   };
 
   const handleReset = () => {
     setCat('');
     router.push(`${pathname}`, { scroll: false });
-    router.refresh(); // 同样强制刷新
+    router.refresh(); 
   };
 
+  // 【UI 优化】：改为靠左的紧凑型工具栏排列，缩小按钮和输入框
   return (
-    <form onSubmit={handleSubmit} style={{ display: 'flex', gap: '15px', alignItems: 'flex-end' }}>
-      <div style={{ flex: 1 }}>
-        <label style={{ fontSize: '14px', color: '#333', fontWeight: '600', display: 'block', marginBottom: '8px' }}>
-          按分类查询（可输入关键词或直接选择）：
-        </label>
-        <input 
-          value={cat}
-          onChange={(e) => setCat(e.target.value)}
-          list="category-list"
-          placeholder="例如输入：竞品、穿搭、痛点..." 
-          style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #ddd', fontSize: '14px' }} 
-        />
-        <datalist id="category-list">
-          {allCats.map(c => (
-            <option key={c} value={c} />
-          ))}
-        </datalist>
-      </div>
+    <form onSubmit={handleSubmit} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+      <label style={{ fontSize: '14px', color: '#333', fontWeight: '600', whiteSpace: 'nowrap' }}>
+        按分类查询：
+      </label>
       
-      <button type="submit" style={{ padding: '12px 30px', background: '#ff2442', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', fontSize: '14px' }}>
-        🔍 立即筛选
+      <input 
+        value={cat}
+        onChange={(e) => setCat(e.target.value)}
+        list="category-list"
+        placeholder="输入或选择分类..." 
+        style={{ width: '220px', padding: '8px 12px', borderRadius: '6px', border: '1px solid #ddd', fontSize: '13px', outline: 'none' }} 
+      />
+      <datalist id="category-list">
+        {allCats.map(c => <option key={c} value={c} />)}
+      </datalist>
+      
+      <button type="submit" style={{ padding: '8px 16px', background: '#ff2442', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', fontSize: '13px', transition: 'opacity 0.2s' }}>
+        🔍 筛选
       </button>
       
-      <button type="button" onClick={handleReset} style={{ paddingBottom: '12px', background: 'none', border: 'none', color: '#666', textDecoration: 'none', fontSize: '13px', cursor: 'pointer' }}>
+      <button type="button" onClick={handleReset} style={{ padding: '8px 10px', background: 'transparent', border: 'none', color: '#888', fontSize: '13px', cursor: 'pointer' }}>
         重置
       </button>
     </form>
