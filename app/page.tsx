@@ -96,6 +96,8 @@ export default async function XhsDashboard(props: {
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
             <thead>
               <tr style={{ backgroundColor: '#fafafa', borderBottom: '1px solid #eee' }}>
+                {/* 新增序号表头 */}
+                <th style={{ padding: '18px 20px', color: '#666', fontWeight: '600', width: '60px', textAlign: 'center' }}>序号</th>
                 <th style={{ padding: '18px 20px', color: '#666', fontWeight: '600' }}>笔记标题</th>
                 <th style={{ padding: '18px 20px', color: '#666', fontWeight: '600' }}>分类</th>
                 <th style={{ padding: '18px 20px', color: '#666', fontWeight: '600' }}>点赞数</th>
@@ -104,8 +106,12 @@ export default async function XhsDashboard(props: {
               </tr>
             </thead>
             <tbody>
-              {rows.map((note: any) => (
+              {rows.map((note: any, index: number) => (
                 <tr key={note.id} style={{ borderBottom: '1px solid #f5f5f5' }}>
+                  {/* 新增序号单元格 */}
+                  <td style={{ padding: '15px 20px', textAlign: 'center', color: '#999', fontSize: '14px' }}>
+                    {index + 1}
+                  </td>
                   <td style={{ padding: '15px 20px', fontWeight: '500', maxWidth: '450px' }}>{note.title}</td>
                   <td style={{ padding: '15px 20px' }}>
                     <span style={{ background: '#fff0f2', color: '#ff2442', padding: '4px 12px', borderRadius: '20px', fontSize: '12px' }}>
