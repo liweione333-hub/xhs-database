@@ -1,5 +1,6 @@
 import { sql } from '@vercel/postgres';
 import SearchForm from './SearchForm';
+// 🌟 引入你的星标打勾组件
 import StarCheckbox from './StarCheckbox'; 
 import { unstable_noStore as noStore } from 'next/cache';
 
@@ -94,6 +95,7 @@ export default async function XhsDashboard({
                 <th style={{ padding: '16px 20px', color: '#666', fontWeight: '600', fontSize: '14px' }}>点赞数</th>
                 <th style={{ padding: '16px 20px', color: '#666', fontWeight: '600', fontSize: '14px' }}>发布日期</th>
                 <th style={{ padding: '16px 20px', color: '#666', fontWeight: '600', fontSize: '14px' }}>链接</th>
+                {/* 🌟 新增：标记列的表头 */}
                 <th style={{ padding: '16px 20px', color: '#666', fontWeight: '600', textAlign: 'center', fontSize: '14px' }}>标记</th>
               </tr>
             </thead>
@@ -116,6 +118,7 @@ export default async function XhsDashboard({
                       详情 ↗
                     </a>
                   </td>
+                  {/* 🌟 新增：这里呼叫了星标组件 */}
                   <td style={{ padding: '14px 20px', textAlign: 'center' }}>
                     <StarCheckbox id={note.id} initialStatus={note.is_starred} />
                   </td>
