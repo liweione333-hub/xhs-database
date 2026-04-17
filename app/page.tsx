@@ -1,7 +1,9 @@
 import { sql } from '@vercel/postgres';
 import SearchForm from './SearchForm';
+// 👇 1. 在顶部导入我们刚写的星星组件
+import StarCheckbox from './StarCheckbox'; 
+import { unstable_noStore as noStore } from 'next/cache';
 
-// 【核心修复】：彻底关闭服务器端的任何缓存念头
 export const dynamic = 'force-dynamic';
 export const fetchCache = 'force-no-store';
 export const revalidate = 0;
@@ -13,22 +15,22 @@ export const metadata = {
 export default async function XhsDashboard({
   searchParams,
 }: {
-  // 兼容 Next.js 14(对象) 和 Next.js 15(Promise) 两种形态
-  searchParams: { [key: string]: string | undefined } | Promise<{ [key: string]: string | undefined }>;
+  searchParams: { [key: string]: string | string[] | undefined } | Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
-  // 安全解析参数
-  const resolvedParams = await searchParams;
-  const selectedCat = resolvedParams?.cat ? String(resolvedParams.cat).trim() : '';
+  noStore();
 
-  // 获取所有唯一的分类
+  const resolvedParams = await searchParams;
+  let rawCat = resolvedParams?.cat;
+  if (Array.isArray(rawCat)) rawCat = rawCat[0];
+  const selectedCat = rawCat && typeof rawCat === 'string' ? rawCat.trim() : '';
+
   const { rows: allCatsResult } = await sql`SELECT DISTINCT category FROM xhs_notes ORDER BY category ASC`;
   const allCats = allCatsResult.map(row => row.category);
 
-  // 根据参数生成数据库请求
   let query;
   if (selectedCat !== '') {
     const filter = `%${selectedCat}%`;
-    query = sql`SELECT * FROM xhs_notes WHERE category LIKE ${filter} ORDER BY created_at DESC`;
+    query = sql`SELECT * FROM xhs_notes WHERE category ILIKE ${filter} ORDER BY created_at DESC`;
   } else {
     query = sql`SELECT * FROM xhs_notes ORDER BY created_at DESC`;
   }
@@ -50,8 +52,8 @@ export default async function XhsDashboard({
         </header>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px', marginBottom: '30px' }}>
+          {/* ... 统计卡片部分保持不变 ... */}
           <div style={{ background: '#fff', padding: '20px', borderRadius: '12px', boxShadow: '0 2px 10px rgba(0,0,0,0.05)' }}>
-            {/* 这里的文案修改了，如果筛选了类目，会直接在卡片上显示出来 */}
             <p style={{ color: '#888', fontSize: '14px', margin: 0 }}>
               当前筛选结果 {selectedCat ? <span style={{color: '#ff2442', fontWeight: 'bold'}}>[ {selectedCat} ]</span> : '[ 全部 ]'}
             </p>
@@ -75,12 +77,14 @@ export default async function XhsDashboard({
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
             <thead>
               <tr style={{ backgroundColor: '#fafafa', borderBottom: '1px solid #eee' }}>
-                <th style={{ padding: '18px 20px', color: '#666', fontWeight: '600', width: '100px', textAlign: 'center' }}>序号</th>
+                <th style={{ padding: '18px 20px', color: '#666', fontWeight: '600', width: '80px', textAlign: 'center' }}>序号</th>
                 <th style={{ padding: '18px 20px', color: '#666', fontWeight: '600' }}>笔记标题</th>
                 <th style={{ padding: '18px 20px', color: '#666', fontWeight: '600' }}>分类</th>
                 <th style={{ padding: '18px 20px', color: '#666', fontWeight: '600' }}>点赞数</th>
                 <th style={{ padding: '18px 20px', color: '#666', fontWeight: '600' }}>发布日期</th>
                 <th style={{ padding: '18px 20px', color: '#666', fontWeight: '600' }}>链接</th>
+                {/* 👇 2. 表头增加“关注”列 */}
+                <th style={{ padding: '18px 20px', color: '#666', fontWeight: '600', textAlign: 'center' }}>标记</th>
               </tr>
             </thead>
             <tbody>
@@ -102,10 +106,14 @@ export default async function XhsDashboard({
                       详情 ↗
                     </a>
                   </td>
+                  {/* 👇 3. 表格内增加星星组件 */}
+                  <td style={{ padding: '15px 20px', textAlign: 'center' }}>
+                    <StarCheckbox id={note.id} initialStatus={note.is_starred} />
+                  </td>
                 </tr>
               )) : (
                 <tr>
-                  <td colSpan={6} style={{ padding: '40px', textAlign: 'center', color: '#999' }}>
+                  <td colSpan={7} style={{ padding: '40px', textAlign: 'center', color: '#999' }}>
                     没有找到符合该分类的数据
                   </td>
                 </tr>
