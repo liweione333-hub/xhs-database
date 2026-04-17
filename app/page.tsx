@@ -90,7 +90,7 @@ export default async function XhsDashboard({
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
             <thead>
               <tr style={{ backgroundColor: '#fafafa', borderBottom: '1px solid #eee' }}>
-                <th style={{ padding: '12px 20px', color: '#666', fontWeight: '600', width: '60px', textAlign: 'center', fontSize: '14px' }}>序号</th>
+                <th style={{ padding: '12px 20px', color: '#666', fontWeight: '600', width: '100px', textAlign: 'center', fontSize: '14px' }}>序号</th>
                 <th style={{ padding: '12px 20px', color: '#666', fontWeight: '600', fontSize: '14px' }}>笔记标题</th>
                 <th style={{ padding: '12px 20px', color: '#666', fontWeight: '600', fontSize: '14px', width: '120px' }}>分类</th>
                 <th style={{ padding: '12px 20px', color: '#666', fontWeight: '600', fontSize: '14px', width: '100px' }}>点赞数</th>
