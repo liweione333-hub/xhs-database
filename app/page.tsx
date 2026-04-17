@@ -1,38 +1,35 @@
 import { sql } from '@vercel/postgres';
+import SearchForm from './SearchForm'; // 引入刚才新建的无刷新组件
 
-// 1. 修改浏览器标签页标题
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export const metadata = {
   title: '小红书笔记采集',
 };
 
-// 强制不缓存，确保每次筛选都是实时查询
-export const revalidate = 0;
-
 export default async function XhsDashboard(props: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
-  // 核心修复：在 Next.js 新版本中，searchParams 必须 await 才能获取
   const searchParams = await props.searchParams;
-  const selectedCat = (searchParams.cat as string) || '';
+  const selectedCat = typeof searchParams.cat === 'string' ? searchParams.cat.trim() : '';
 
-  // 2. 获取所有唯一的分类（用于下拉提示列表）
-  const { rows: allCats } = await sql`SELECT DISTINCT category FROM xhs_notes ORDER BY category ASC`;
+  // 获取所有唯一的分类
+  const { rows: allCatsResult } = await sql`SELECT DISTINCT category FROM xhs_notes ORDER BY category ASC`;
+  // 将对象数组转换为纯字符串数组，传给子组件
+  const allCats = allCatsResult.map(row => row.category);
 
-  // 3. 实际生效的筛选逻辑
   let query;
   if (selectedCat) {
-    // 使用 ILIKE 进行模糊匹配，支持手动输入关键词查询分类
     const filter = `%${selectedCat}%`;
-    query = sql`SELECT * FROM xhs_notes WHERE category ILIKE ${filter} ORDER BY created_at DESC`;
+    query = sql`SELECT * FROM xhs_notes WHERE category LIKE ${filter} ORDER BY created_at DESC`;
   } else {
     query = sql`SELECT * FROM xhs_notes ORDER BY created_at DESC`;
   }
 
   const { rows } = await query;
 
-  // 统计数据
   const totalNotes = rows.length;
-  // 转换为北京时间显示
   const lastUpdateTime = rows[0] 
     ? new Date(rows[0].created_at).toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' }) 
     : '暂无数据';
@@ -43,8 +40,8 @@ export default async function XhsDashboard(props: {
         
         {/* 顶部标题栏 */}
         <header style={{ marginBottom: '30px' }}>
-          <h1 style={{ color: '#ff2442', fontSize: '28px', margin: 0 }}>📊 小红书笔记采集后台</h1>
-          <p style={{ color: '#666', marginTop: '5px' }}>系统化管理你的爆款情报库</p>
+          <h1 style={{ color: '#ff2442', fontSize: '28px', margin: 0 }}>📊 小红书爆款笔记采集</h1>
+          <p style={{ color: '#666', marginTop: '5px' }}>系统化管理你的笔记情报库</p>
         </header>
 
         {/* 统计卡片 */}
@@ -63,32 +60,9 @@ export default async function XhsDashboard(props: {
           </div>
         </div>
 
-        {/* 筛选功能区：支持手动输入与下拉联动 */}
+        {/* 筛选功能区：现在使用独立的客户端无刷新组件 */}
         <div style={{ background: '#fff', padding: '25px', borderRadius: '12px', boxShadow: '0 2px 10px rgba(0,0,0,0.05)', marginBottom: '30px' }}>
-          <form action="/" method="GET" style={{ display: 'flex', gap: '15px', alignItems: 'flex-end' }}>
-            <div style={{ flex: 1 }}>
-              <label style={{ fontSize: '14px', color: '#333', fontWeight: '600', display: 'block', marginBottom: '8px' }}>
-                按分类查询（可输入关键词或直接选择）：
-              </label>
-              <input 
-                name="cat" 
-                list="category-list"
-                defaultValue={selectedCat}
-                placeholder="例如输入：竞品、穿搭、痛点..." 
-                style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #ddd', fontSize: '14px' }} 
-              />
-              <datalist id="category-list">
-                {allCats.map(c => (
-                  <option key={c.category} value={c.category} />
-                ))}
-              </datalist>
-            </div>
-            
-            <button type="submit" style={{ padding: '12px 30px', background: '#ff2442', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', fontSize: '14px' }}>
-              🔍 立即筛选
-            </button>
-            <a href="/" style={{ paddingBottom: '12px', color: '#666', textDecoration: 'none', fontSize: '13px' }}>重置</a>
-          </form>
+          <SearchForm allCats={allCats} initialCat={selectedCat} />
         </div>
 
         {/* 数据表格区 */}
@@ -96,8 +70,7 @@ export default async function XhsDashboard(props: {
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
             <thead>
               <tr style={{ backgroundColor: '#fafafa', borderBottom: '1px solid #eee' }}>
-                {/* 新增序号表头 */}
-                <th style={{ padding: '18px 20px', color: '#666', fontWeight: '600', width: '60px', textAlign: 'center' }}>序号</th>
+                <th style={{ padding: '18px 20px', color: '#666', fontWeight: '600', width: '100px', textAlign: 'center' }}>序号</th>
                 <th style={{ padding: '18px 20px', color: '#666', fontWeight: '600' }}>笔记标题</th>
                 <th style={{ padding: '18px 20px', color: '#666', fontWeight: '600' }}>分类</th>
                 <th style={{ padding: '18px 20px', color: '#666', fontWeight: '600' }}>点赞数</th>
@@ -108,7 +81,6 @@ export default async function XhsDashboard(props: {
             <tbody>
               {rows.map((note: any, index: number) => (
                 <tr key={note.id} style={{ borderBottom: '1px solid #f5f5f5' }}>
-                  {/* 新增序号单元格 */}
                   <td style={{ padding: '15px 20px', textAlign: 'center', color: '#999', fontSize: '14px' }}>
                     {index + 1}
                   </td>
