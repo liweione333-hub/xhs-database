@@ -42,7 +42,7 @@ export default async function XhsDashboard({
         
         {/* 顶部标题栏 */}
         <header style={{ marginBottom: '30px' }}>
-          <h1 style={{ color: '#ff2442', fontSize: '28px', margin: 0 }}>📊 小红书爆款监控后台</h1>
+          <h1 style={{ color: '#ff2442', fontSize: '28px', margin: 0 }}>📊 小红书爆款笔记采集</h1>
           <p style={{ color: '#666', marginTop: '5px' }}>实时同步自插件采集的数据仓库</p>
         </header>
 
