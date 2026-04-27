@@ -32,9 +32,10 @@ export async function POST(request: Request) {
     
     // 循环把插件传来的每一条小红书笔记插入数据库
     for (const note of data) {
+      // 🚀 修改点：在这里加入了 author 字段
       await sql`
-        INSERT INTO xhs_notes (title, likes, publish_time, url, category)
-        VALUES (${note.title}, ${note.likes}, ${note.time}, ${note.url}, ${category});
+        INSERT INTO xhs_notes (title, author, likes, publish_time, url, category)
+        VALUES (${note.title}, ${note.author}, ${note.likes}, ${note.time}, ${note.url}, ${category});
       `;
       insertedCount++;
     }
