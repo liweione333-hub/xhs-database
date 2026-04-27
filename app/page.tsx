@@ -122,7 +122,7 @@ export default async function XhsDashboard({
               <tr style={{ backgroundColor: '#fafafa', borderBottom: '1px solid #eee' }}>
                 <th style={{ padding: '12px 20px', color: '#666', fontWeight: '600', width: '80px', textAlign: 'center', fontSize: '14px' }}>序号</th>
                 <th style={{ padding: '12px 20px', color: '#666', fontWeight: '600', fontSize: '14px' }}>笔记标题</th>
-                <th style={{ padding: '12px 20px', color: '#666', fontWeight: '600', fontSize: '14px', width: '120px' }}>作者</th>
+                <th style={{ padding: '12px 20px', color: '#666', fontWeight: '600', fontSize: '14px', width: '130px' }}>作者</th>
                 <th style={{ padding: '12px 20px', color: '#666', fontWeight: '600', fontSize: '14px', width: '100px' }}>分类</th>
                 {/* 🚀 修改：点赞数表头支持排序 */}
                 <th style={{ padding: '12px 20px', color: '#666', fontWeight: '600', fontSize: '14px', width: '110px' }}>
@@ -136,7 +136,7 @@ export default async function XhsDashboard({
                     发布日期 {sortField === 'publish_time' ? (sortOrder === 'ASC' ? '↑' : '↓') : '↕'}
                   </Link>
                 </th>
-                <th style={{ padding: '12px 20px', color: '#666', fontWeight: '600', fontSize: '14px', width: '70px', textAlign: 'center' }}>链接</th>
+                <th style={{ padding: '12px 20px', color: '#666', fontWeight: '600', fontSize: '14px', width: '85px', textAlign: 'center' }}>链接</th>
                 <th style={{ padding: '12px 20px', color: '#666', fontWeight: '600', fontSize: '14px', width: '60px', textAlign: 'center' }}>标记</th>
               </tr>
             </thead>
