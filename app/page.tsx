@@ -90,12 +90,14 @@ export default async function XhsDashboard({
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
             <thead>
               <tr style={{ backgroundColor: '#fafafa', borderBottom: '1px solid #eee' }}>
-                <th style={{ padding: '12px 20px', color: '#666', fontWeight: '600', width: '100px', textAlign: 'center', fontSize: '14px' }}>序号</th>
+                <th style={{ padding: '12px 20px', color: '#666', fontWeight: '600', width: '80px', textAlign: 'center', fontSize: '14px' }}>序号</th>
                 <th style={{ padding: '12px 20px', color: '#666', fontWeight: '600', fontSize: '14px' }}>笔记标题</th>
-                <th style={{ padding: '12px 20px', color: '#666', fontWeight: '600', fontSize: '14px', width: '120px' }}>分类</th>
-                <th style={{ padding: '12px 20px', color: '#666', fontWeight: '600', fontSize: '14px', width: '100px' }}>点赞数</th>
-                <th style={{ padding: '12px 20px', color: '#666', fontWeight: '600', fontSize: '14px', width: '120px' }}>发布日期</th>
-                <th style={{ padding: '12px 20px', color: '#666', fontWeight: '600', fontSize: '14px', width: '80px', textAlign: 'center' }}>链接</th>
+                {/* 🚀 新增：作者表头 */}
+                <th style={{ padding: '12px 20px', color: '#666', fontWeight: '600', fontSize: '14px', width: '120px' }}>作者</th>
+                <th style={{ padding: '12px 20px', color: '#666', fontWeight: '600', fontSize: '14px', width: '100px' }}>分类</th>
+                <th style={{ padding: '12px 20px', color: '#666', fontWeight: '600', fontSize: '14px', width: '90px' }}>点赞数</th>
+                <th style={{ padding: '12px 20px', color: '#666', fontWeight: '600', fontSize: '14px', width: '110px' }}>发布日期</th>
+                <th style={{ padding: '12px 20px', color: '#666', fontWeight: '600', fontSize: '14px', width: '70px', textAlign: 'center' }}>链接</th>
                 <th style={{ padding: '12px 20px', color: '#666', fontWeight: '600', fontSize: '14px', width: '60px', textAlign: 'center' }}>标记</th>
               </tr>
             </thead>
@@ -103,9 +105,11 @@ export default async function XhsDashboard({
               {rows.length > 0 ? rows.map((note: any, index: number) => (
                 <tr key={note.id} style={{ borderBottom: '1px solid #f8f8f8' }}>
                   <td style={{ padding: '10px 20px', textAlign: 'center', color: '#aaa', fontSize: '13px' }}>{index + 1}</td>
-                  <td style={{ padding: '10px 20px', fontWeight: '500', maxWidth: '400px', fontSize: '14px' }}>{note.title}</td>
+                  <td style={{ padding: '10px 20px', fontWeight: '500', maxWidth: '300px', fontSize: '14px' }}>{note.title}</td>
+                  {/* 🚀 新增：作者数据 */}
+                  <td style={{ padding: '10px 20px', color: '#555', fontSize: '13px', fontWeight: '500' }}>{note.author || '未知作者'}</td>
                   <td style={{ padding: '10px 20px' }}>
-                    <span style={{ background: '#fff0f2', color: '#ff2442', padding: '2px 10px', borderRadius: '12px', fontSize: '11px', fontWeight: '500' }}>
+                    <span style={{ background: '#fff0f2', color: '#ff2442', padding: '2px 10px', borderRadius: '12px', fontSize: '11px', fontWeight: '500', whiteSpace: 'nowrap' }}>
                       {note.category}
                     </span>
                   </td>
@@ -120,7 +124,8 @@ export default async function XhsDashboard({
                 </tr>
               )) : (
                 <tr>
-                  <td colSpan={7} style={{ padding: '40px', textAlign: 'center', color: '#999' }}>没有找到符合该分类的数据</td>
+                  {/* 🚀 修改：列数从 7 变成 8，保证空数据提示居中 */}
+                  <td colSpan={8} style={{ padding: '40px', textAlign: 'center', color: '#999' }}>没有找到符合该分类的数据</td>
                 </tr>
               )}
             </tbody>
